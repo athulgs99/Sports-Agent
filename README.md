@@ -147,7 +147,7 @@ FLASK_DEBUG=True
 
 This project is open source and available under the [MIT License](LICENSE).
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Groq](https://groq.com/) for fast LLM API
 - [TheSportsDB](https://www.thesportsdb.com/) for sports data
