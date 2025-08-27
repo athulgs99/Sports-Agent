@@ -1,0 +1,14 @@
+# AI Sports Commentator Environment Variables
+# Copy this file to .env and fill in your actual values
+
+# API Keys (Required)
+SPORTS_API_KEY=123
+GROQ_API_KEY=your_groq_api_key_here
+
+# Flask Configuration
+SECRET_KEY=your-secret-key-change-this-to-something-secure
+FLASK_ENV=development
+FLASK_DEBUG=True
+
+# Optional: Custom port (default is 5000)
+# PORT=5000
