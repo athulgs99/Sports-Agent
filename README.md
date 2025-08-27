@@ -46,7 +46,7 @@ An intelligent sports commentary generator that creates personalized audio comme
    
    Edit `.env` and add your API keys:
    ```env
-   SPORTS_API_KEY=123
+   SPORTS_API_KEY=your_sports_key
    GROQ_API_KEY=your_groq_api_key_here
    FLASK_ENV=development
    FLASK_DEBUG=True
