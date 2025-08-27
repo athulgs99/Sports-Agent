@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Sports Commentator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+body { font-family: 'Inter', sans-serif; }
+</style>
+</head>
+<body class="bg-gray-950 text-white min-h-screen flex items-center justify-center p-4">
+
+<div class="bg-gray-900 p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-800">
+
+<header class="text-center mb-10">
+<h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-sky-500">
+AI Sports Studio
+</h1>
+<p class="mt-4 text-gray-400 text-lg">Your game, personalized commentary.</p>
+</header>
+
+<section class="mb-10">
+<h2 class="text-xl md:text-2xl font-semibold mb-6">1. Select your Commentator</h2>
+<div id="commentator-buttons" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<button data-commentator="Ravi Shastri" class="commentator-btn p-4 rounded-xl font-medium text-lg transition-all duration-300 transform hover:-translate-y-1 bg-gray-800 hover:bg-teal-500 hover:text-black">🎙️ Ravi Shastri</button>
+<button data-commentator="Harsha Bhogle" class="commentator-btn p-4 rounded-xl font-medium text-lg transition-all duration-300 transform hover:-translate-y-1 bg-gray-800 hover:bg-teal-500 hover:text-black">✍️ Harsha Bhogle</button>
+<button data-commentator="Tony Romo" class="commentator-btn p-4 rounded-xl font-medium text-lg transition-all duration-300 transform hover:-translate-y-1 bg-gray-800 hover:bg-teal-500 hover:text-black">🏈 Tony Romo</button>
+</div>
+
+<h2 class="text-xl md:text-2xl font-semibold mt-8 mb-6">2. Choose a Team</h2>
+<input type="text" id="team_id" placeholder="Enter Team ID or choose below" class="w-full bg-gray-800 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-300">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+<button data-team="134860" class="team-btn p-3 rounded-xl transition-all duration-300 bg-gray-800 hover:bg-sky-500 hover:text-black">Boston Celtics</button>
+<button data-team="133602" class="team-btn p-3 rounded-xl transition-all duration-300 bg-gray-800 hover:bg-sky-500 hover:text-black">Liverpool</button>
+<button data-team="133604" class="team-btn p-3 rounded-xl transition-all duration-300 bg-gray-800 hover:bg-sky-500 hover:text-black">Arsenal</button>
+</div>
+
+<h2 class="text-xl md:text-2xl font-semibold mt-8 mb-6">3. Select Language</h2>
+<select id="language" class="w-full bg-gray-800 text-white p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all duration-300">
+<option>English</option>
+<option>Hindi</option>
+<option>Spanish</option>
+</select>
+</section>
+
+<div class="text-center">
+<button id="generate-btn" class="w-full p-4 rounded-2xl text-black font-bold text-xl bg-gradient-to-r from-teal-400 to-sky-500 transition-all duration-300 transform hover:scale-105 shadow-lg">
+Generate Commentary
+</button>
+</div>
+
+<section class="mt-10">
+<div id="loader" class="hidden text-center text-teal-400 animate-pulse text-lg">
+<span class="inline-block animate-spin mr-2">⏳</span> Generating commentary...
+</div>
+<div id="message" class="hidden text-center text-red-500 mb-4 text-sm"></div>
+<div id="commentary-output" class="hidden bg-gray-800 p-6 rounded-2xl border border-gray-700 max-h-64 overflow-y-auto">
+<div id="commentary-text" class="text-gray-200 leading-relaxed"></div>
+<audio id="commentary-audio" controls class="w-full mt-6 rounded-lg"></audio>
+</div>
+</section>
+
+</div>
+
+<script>
+const commentatorBtns = document.querySelectorAll('.commentator-btn');
+const teamBtns = document.querySelectorAll('.team-btn');
+const generateBtn = document.getElementById('generate-btn');
+const loader = document.getElementById('loader');
+const messageBox = document.getElementById('message');
+const commentaryOutput = document.getElementById('commentary-output');
+const commentaryText = document.getElementById('commentary-text');
+const commentaryAudio = document.getElementById('commentary-audio');
+const teamIdInput = document.getElementById('team_id');
+const languageSelect = document.getElementById('language');
+
+let selectedCommentator = "Ravi Shastri";
+commentatorBtns[0].classList.add('bg-teal-500', 'text-black');
+
+commentatorBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        commentatorBtns.forEach(b => b.classList.remove('bg-teal-500', 'text-black'));
+        btn.classList.add('bg-teal-500', 'text-black');
+        selectedCommentator = btn.dataset.commentator;
+    });
+});
+
+teamBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove highlight from all team buttons
+        teamBtns.forEach(b => b.classList.remove('bg-sky-500', 'text-black'));
+        // Add highlight to clicked button
+        btn.classList.add('bg-sky-500', 'text-black');
+        // Set the input value
+        teamIdInput.value = btn.dataset.team;
+    });
+});
+
+generateBtn.addEventListener('click', getCommentary);
+
+function showMessage(msg, type = 'error') {
+    messageBox.innerText = msg;
+    messageBox.classList.remove('hidden', 'text-red-500', 'text-green-500');
+    messageBox.classList.add(type === 'success' ? 'text-green-500' : 'text-red-500');
+    messageBox.classList.remove('hidden');
+    setTimeout(() => messageBox.classList.add('hidden'), 5000);
+}
+
+async function getCommentary() {
+    const team_id = teamIdInput.value.trim();
+    const language = languageSelect.value;
+
+    if (!team_id) {
+        showMessage("Please enter a team ID or choose one of the teams below.");
+        return;
+    }
+
+    // Validate team ID format
+    if (!/^\d+$/.test(team_id)) {
+        showMessage("Please enter a valid numeric team ID.");
+        return;
+    }
+
+    commentaryOutput.classList.add('hidden');
+    commentaryText.innerText = "";
+    commentaryAudio.src = "";
+    loader.classList.remove('hidden');
+
+    try {
+        const res = await fetch("/commentary", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({team_id, commentator: selectedCommentator, language})
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || `Server returned status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        loader.classList.add('hidden');
+        commentaryOutput.classList.remove('hidden');
+        commentaryText.innerText = data.text;
+
+        if (data.audio) {
+            commentaryAudio.src = data.audio;
+            commentaryAudio.play();
+        } else {
+            showMessage("Audio file could not be generated.", "error");
+        }
+    } catch(e) {
+        loader.classList.add('hidden');
+        showMessage(e.message || "Failed to generate commentary. Please check the Team ID and try again.", "error");
+        console.error(e);
+    }
+}
+</script>
+</body>
+</html>
